@@ -76,31 +76,32 @@ export const constantRouterMap = [
     path: '/system',
     component: Layout,
     redirect: '/system/user',
-    meta: { title: '系统管理', icon: 'form' },
+    name: 'system',
+    meta: { title: '系统管理', icon: 'setting' },
     children: [
       {
         path: 'user',
         name: 'user',
-        component: () => import('@/views/form/index'),
-        meta: { title: '用户管理', icon: 'form' }
+        component: () => import('@/views/system/user'),
+        meta: { title: '用户管理', icon: 'user' }
       },
       {
         path: 'role',
         name: 'role',
-        component: () => import('@/views/form/index'),
-        meta: { title: '角色管理', icon: 'form' }
+        component: () => import('@/views/system/user'),
+        meta: { title: '角色管理', icon: 'user' }
       },
       {
         path: 'menu',
         name: 'menu',
-        component: () => import('@/views/form/index'),
-        meta: { title: '菜单管理', icon: 'form' }
+        component: () => import('@/views/system/user'),
+        meta: { title: '菜单管理', icon: 'user' }
       },
       {
         path: 'log',
         name: 'log',
-        component: () => import('@/views/form/index'),
-        meta: { title: '系统日志', icon: 'form' }
+        component: () => import('@/views/system/user'),
+        meta: { title: '系统日志', icon: 'user' }
       }
     ]
   },
