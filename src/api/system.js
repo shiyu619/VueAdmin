@@ -41,8 +41,20 @@ const roleList = {
   }
 };
 
+// 获取角色列表
+const getRoleList = {
+  p: ['get,/getRole'],
+  r: token => {
+    return request({
+      'url': '/getRole',
+      'method': 'get'
+    });
+  }
+};
+
 export {
   login,
   userList,
-  roleList
+  roleList,
+  getRoleList
 };

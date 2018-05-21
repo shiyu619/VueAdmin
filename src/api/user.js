@@ -28,7 +28,6 @@ const getInfo = {
     });
   }
 };
-
 // 获取用户信息
 const logout = {
   p: ['get,/user/info'],

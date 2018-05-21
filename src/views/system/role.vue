@@ -18,33 +18,39 @@
         <!--checkbox 适当加宽，否则IE下面有省略号 https://github.com/ElemeFE/element/issues/1563-->
         <el-table-column prop="id" type="selection" width="50">
         </el-table-column>
-        <el-table-column label="照片" width="76">
+        <el-table-column label="id" width="76">
           <template slot-scope="scope">
-            <img :src='scope.row.photo' style="height: 35px;vertical-align: middle;" alt="">
+            {{ scope.row.id }}
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="名称">
+        <el-table-column prop="pai" label="排序" width="60">
+          <template slot-scope="scope">
+            <el-input size="mini" placeholder="" v-model="scope.row.id">
+            </el-input>
+          </template>
+        </el-table-column>
+        <el-table-column prop="nickName" label="名称">
           <template slot-scope="scope">
             {{ scope.row.name }}
           </template>
         </el-table-column>
-        <el-table-column prop="nickName" label="登录用户名">
+        <el-table-column prop="nickName" label="描述">
           <template slot-scope="scope">
             {{ scope.row.name }}
           </template>
-        </el-table-column>
-        <el-table-column prop="email" label="邮箱">
         </el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
             {{ scope.row.status===1 ? '已激活' : '未激活' }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="285">
+        <el-table-column label="操作" width="325">
           <template slot-scope="scope">
             <el-button size="small" type="default" icon="edit" @click="handleEdit(scope.$index, scope.row)">编辑
             </el-button>
-            <el-button size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">配置角色
+            <el-button size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">授权
+            </el-button>
+            <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">禁用
             </el-button>
             <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
             </el-button>
@@ -59,57 +65,28 @@
 
         <div>
           <el-form ref="form" :model="form" label-width="100px">
-            <el-form-item label="用户名">
+            <el-form-item label="角色名">
               <el-input v-model="form.name"></el-input>
             </el-form-item>
-            <el-form-item label="登录用户名">
+            <el-form-item label="描述">
               <el-input v-model="form.loginName"></el-input>
             </el-form-item>
-            <el-form-item label="手机">
+            <el-form-item label="排序">
               <el-input v-model="form.phone"></el-input>
             </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="form.email"></el-input>
-            </el-form-item>
-            <el-form-item label="工号">
-              <el-input v-model="form.companyId"></el-input>
-            </el-form-item>
-            <el-form-item label="固定电话">
-              <el-input v-model="form.mobile"></el-input>
-            </el-form-item>
-
-            <el-form-item label="状态">
-              <el-radio-group v-model="form.resource">
-                <el-radio label="禁用"></el-radio>
-                <el-radio label="激活"></el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="用户类型">
-              <el-radio-group v-model="form.resource">
-                <el-radio label="用户注册"></el-radio>
-                <el-radio label="后台配置"></el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="备注">
-              <el-input type="textarea" v-model="form.name"></el-input>
-            </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="onSubmit">立即创建</el-button>
+              <el-button type="primary" @click="onSubmit">保存</el-button>
               <el-button @click="handleClose">取消</el-button>
             </el-form-item>
           </el-form>
         </div>
       </el-dialog>
 
-      <el-dialog title="配置用户角色" v-model="dialogVisible" size="tiny">
-        <div class="select-tree">
-          <el-scrollbar tag="div" class='is-empty' wrap-class="el-select-dropdown__wrap" view-class="el-select-dropdown__list">
-            <el-tree ref="roleTree" :data="roleTree" show-checkbox check-strictly node-key="id" v-loading="dialogLoading" :props="defaultProps">
-            </el-tree>
-          </el-scrollbar>
-        </div>
+      <el-dialog title="配置用户角色" :visible="dialogResources" size="tiny" :before-close="handleCloseResources">
+        <el-tree :data="resources" show-checkbox default-expand-all node-key="id" ref="roleTree">
+        </el-tree>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
+          <el-button @click="handleCloseResources">取 消</el-button>
           <el-button type="primary" @click="configUserRoles">确 定</el-button>
         </span>
       </el-dialog>
@@ -121,7 +98,51 @@
   import panel from '../../components/panel.vue';
   import * as api from '../../api';
   import * as sysApi from '@/api/system';
-
+  const resources = [{
+    id: 1,
+    label: '一级 1',
+    children: [{
+      id: 4,
+      label: '二级 1-1',
+      children: [{
+        id: 9,
+        label: '三级 1-1-1'
+      }, {
+        id: 10,
+        label: '三级 1-1-2'
+      }]
+    }]
+  }, {
+    id: 2,
+    label: '一级 2',
+    children: [{
+      id: 5,
+      label: '二级 2-1'
+    }, {
+      id: 6,
+      label: '二级 2-2'
+    }]
+  }, {
+    id: 3,
+    label: '一级 3',
+    children: [{
+      id: 7,
+      label: '二级 3-1'
+    }, {
+      id: 8,
+      label: '二级 3-2',
+      children: [{
+        id: 11,
+        label: '三级 3-2-1'
+      }, {
+        id: 12,
+        label: '三级 3-2-2'
+      }, {
+        id: 13,
+        label: '三级 3-2-3'
+      }]
+    }]
+  }];
   export default {
     components: {
       'imp-panel': panel,
@@ -139,10 +160,11 @@
           resource: '',
           desc: ''
         },
+        resources: resources,
         userForm: false, // 用户新增和修改的弹窗
         userInfo: {},
         currentRow: {},
-        dialogVisible: false,
+        dialogResources: false,
         dialogLoading: false,
         defaultProps: {
           children: 'children',
@@ -172,27 +194,16 @@
       },
       handleRoleConfig(index, row) {
         this.currentRow = row;
-        this.dialogVisible = true;
-        if (this.roleTree.length <= 0) {
-          sysApi.roleList.r({ selectChildren: true })
-            .then(res => {
-              this.roleTree = res;
-            });
-        }
-        this.$http.get(api.SYS_USER_ROLE + '?id=' + row.id)
-          .then(res => {
-            this.$refs.roleTree.setCheckedKeys(res.data);
-          }).catch(err => {
-            console.log(err);
-          });
+        this.dialogResources = true;
       },
       configUserRoles() {
         const checkedKeys = this.$refs.roleTree.getCheckedKeys();
-        this.$http.get(api.SYS_SET_USER_ROLE + '?userId=' + this.currentRow.id + '&roleIds=' + checkedKeys.join(','))
-          .then(res => {
-            this.$message('修改成功');
-            this.dialogVisible = false;
-          });
+        const nodesDOM = this.$refs.roleTree.$el.querySelectorAll('.el-tree-node');
+        const nodesVue = [].map.call(nodesDOM, node => node.__vue__);
+        nodesVue.filter(item => item.indeterminate === true).map(item => {
+          checkedKeys.push(item.node.data.id);
+        });
+        console.info([...new Set(checkedKeys)]);
       },
       handleSizeChange(val) {
         this.tableData.pagination.pageSize = val;
@@ -203,7 +214,8 @@
         this.loadData();
       },
       handleEdit(index, row) {
-        this.$router.push({ path: 'userAdd', query: { id: row.id }});
+        this.userForm = true;
+        this.form = row;
       },
       handleDelete(index, row) {
         this.$http.get(api.SYS_USER_DELETE + '?userIds=' + row.id).then(res => {
@@ -212,7 +224,7 @@
       },
       loadData() {
         this.listLoading = true;
-        sysApi.userList.r({
+        sysApi.getRoleList.r({
           key: this.searchKey,
           pageSize: this.tableData.pagination.pageSize,
           pageNo: this.tableData.pagination.pageNo
@@ -234,6 +246,9 @@
       },
       onSubmit() {
         console.log('submit!');
+      },
+      handleCloseResources() {
+        this.dialogResources = false;
       }
     },
     created() {
@@ -241,7 +256,7 @@
     }
   };
 </script>
-<style>
+<style rel="stylesheet/scss" lang="scss">
 .user-management {
   margin: 20px;
 }
@@ -258,5 +273,16 @@
   text-align: center;
   color: #bfcbd9;
   transition: all 0.3s;
+}
+.el-tree-node .el-tree-node .el-tree-node {
+  display: inline-block;
+  .el-tree-node__content:hover {
+    background-color: transparent;
+  }
+}
+.el-dialog__footer {
+  padding-bottom: 10px;
+  padding-top: 10px;
+  margin: 20px;
 }
 </style>

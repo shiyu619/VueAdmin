@@ -30,20 +30,11 @@ export const constantRouterMap = [
     component: Layout,
     redirect: '/dashboard',
     name: 'Dashboard',
-    hidden: true,
-    children: [{
-      path: 'dashboard',
-      component: () => import('@/views/dashboard/index')
-    }]
-  },
-
-  {
-    path: '/example',
-    component: Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
     children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index')
+      },
       {
         path: 'table',
         name: 'Table',
@@ -55,44 +46,27 @@ export const constantRouterMap = [
         name: 'Tree',
         component: () => import('@/views/tree/index'),
         meta: { title: 'Tree', icon: 'tree' }
-      }
-    ]
-  },
-
-  {
-    path: '/form',
-    component: Layout,
-    children: [
+      },
       {
         path: 'index',
         name: 'Form',
         component: () => import('@/views/form/index'),
         meta: { title: 'Form', icon: 'form' }
-      }
-    ]
-  },
-
-  {
-    path: '/system',
-    component: Layout,
-    redirect: '/system/user',
-    name: 'system',
-    meta: { title: '系统管理', icon: 'setting' },
-    children: [
+      },
       {
-        path: 'user',
+        path: 'system/user',
         name: 'user',
         component: () => import('@/views/system/user'),
         meta: { title: '用户管理', icon: 'user' }
       },
       {
-        path: 'role',
+        path: 'system/role',
         name: 'role',
-        component: () => import('@/views/system/user'),
+        component: () => import('@/views/system/role'),
         meta: { title: '角色管理', icon: 'user' }
       },
       {
-        path: 'menu',
+        path: 'system/menu',
         name: 'menu',
         component: () => import('@/views/system/user'),
         meta: { title: '菜单管理', icon: 'user' }
@@ -104,9 +78,7 @@ export const constantRouterMap = [
         meta: { title: '系统日志', icon: 'user' }
       }
     ]
-  },
-
-  { path: '*', redirect: '/404', hidden: true }
+  }
 ];
 
 export default new Router({
