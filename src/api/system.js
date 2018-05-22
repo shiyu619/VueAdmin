@@ -52,9 +52,56 @@ const getRoleList = {
   }
 };
 
+// 获取角色列表
+const getAllMenu = {
+  p: ['get,/system/api/getAllMenu'],
+  r: token => {
+    return request({
+      'url': '/system/api/getAllMenu',
+      'method': 'get'
+    });
+  }
+};
+
+// 获取角色列表
+const getSelectData = {
+  p: ['get,/system/api/getSelectMenu'],
+  r: token => {
+    return request({
+      'url': '/system/api/getSelectMenu',
+      'method': 'get'
+    });
+  }
+};
+// 添加菜单
+const addMenu = {
+  p: ['get,/system/api/addMenu'],
+  r: data => {
+    return request({
+      'url': '/system/api/addMenu',
+      'method': 'post',
+      data
+    });
+  }
+};
+// 添加菜单
+const delResources = {
+  p: ['delete,/system/api/delResources'],
+  r: data => {
+    return request({
+      'url': '/system/api/delResources',
+      'method': 'delete',
+      data
+    });
+  }
+};
 export {
   login,
   userList,
   roleList,
-  getRoleList
+  getRoleList,
+  getAllMenu,
+  getSelectData,
+  addMenu,
+  delResources
 };

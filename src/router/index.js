@@ -26,49 +26,28 @@ export const constantRouterMap = [
   { path: '/404', component: () => import('@/views/404'), hidden: true },
 
   {
-    path: '/',
+    path: '/system',
     component: Layout,
-    redirect: '/dashboard',
-    name: 'Dashboard',
+    redirect: '/system/user',
+    name: 'dashboard',
+    meta: { title: '系统管理', icon: 'user' },
     children: [
       {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index')
-      },
-      {
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table/index'),
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: () => import('@/views/tree/index'),
-        meta: { title: 'Tree', icon: 'tree' }
-      },
-      {
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form/index'),
-        meta: { title: 'Form', icon: 'form' }
-      },
-      {
-        path: 'system/user',
+        path: 'user',
         name: 'user',
         component: () => import('@/views/system/user'),
         meta: { title: '用户管理', icon: 'user' }
       },
       {
-        path: 'system/role',
+        path: 'role',
         name: 'role',
         component: () => import('@/views/system/role'),
         meta: { title: '角色管理', icon: 'user' }
       },
       {
-        path: 'system/menu',
-        name: 'menu',
-        component: () => import('@/views/system/user'),
+        path: 'menu',
+        name: 'systemMenu',
+        component: () => import('@/views/system/menu'),
         meta: { title: '菜单管理', icon: 'user' }
       },
       {

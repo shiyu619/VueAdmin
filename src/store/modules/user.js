@@ -27,6 +27,9 @@ const user = {
     },
     SET_ROLES: (state, roles) => {
       state.roles = roles;
+    },
+    SET_RESOURCES: (state, data) => {
+      state.resources = data;
     }
   },
 
@@ -60,6 +63,7 @@ const user = {
           commit('SET_NAME', data.userInfo.name);
           commit('SET_ID', data.userInfo.id);
           commit('SET_AVATAR', data.userInfo.avatar);
+          commit('SET_RESOURCES', [1]);
           resolve(response);
         }).catch(error => {
           reject(error);

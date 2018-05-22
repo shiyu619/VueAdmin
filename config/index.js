@@ -19,6 +19,21 @@ module.exports = {
     poll: false,
 
     proxyTable: {
+      '/travel/system': {
+        // target: "http://xdlx.365daoyou.cn/travel/",
+        target: "http://localhost:8361/",
+        changeOrigin: true,
+        secure: false,
+        pathRewrite: {
+          // '^/api':'https://map.365daoyou.cn/web',
+          '/travel/system': '',
+          //'^/api':'https://map.365daoyou.cn:80/web/'
+        },
+        rewrite: function (req) {
+          console.log(req.url);
+          req.url = req.url.replace(/^\/travel\/system/, '');
+        }
+      },
       '/travel': {
         // target: "http://xdlx.365daoyou.cn/travel/",
         target: "https://www.easy-mock.com/mock/5afe482ab719b77df03ae296/cms/",

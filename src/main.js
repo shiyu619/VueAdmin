@@ -3,6 +3,7 @@ import Vue from 'vue';
 import 'normalize.css/normalize.css';// A modern alternative to CSS resets
 
 import ElementUI from 'element-ui';
+import { Message } from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import locale from 'element-ui/lib/locale/lang/en'; // lang i18n
 
@@ -26,6 +27,18 @@ Vue.directive('has', {
     }
   }
 });
+Vue.prototype.toast = message => {
+  Message({
+    message,
+    type: 'success'
+  });
+};
+Vue.prototype.errToast = message => {
+  Message({
+    message,
+    type: 'error'
+  });
+};
 new Vue({
   el: '#app',
   router,
