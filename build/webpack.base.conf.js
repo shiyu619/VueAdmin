@@ -1,10 +1,11 @@
 'use strict'
 const path = require('path')
+const webpack = require('webpack')
 const utils = require('./utils')
 const config = require('../config')
 const vueLoaderConfig = require('./vue-loader.conf')
-
-function resolve (dir) {
+const { VueLoaderPlugin } = require('vue-loader')
+function resolve(dir) {
   return path.join(__dirname, '..', dir)
 }
 
@@ -38,6 +39,9 @@ module.exports = {
       '@': resolve('src'),
     }
   },
+  plugins: [
+    new VueLoaderPlugin(),
+  ],
   module: {
     rules: [
       ...(config.dev.useEslint ? [createLintingRule()] : []),
@@ -49,7 +53,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test') ,resolve('node_modules/webpack-dev-server/client')]
+        include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
       },
       {
         test: /\.svg$/,

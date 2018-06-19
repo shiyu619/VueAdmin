@@ -7,7 +7,7 @@ import Router from 'vue-router';
 Vue.use(Router);
 
 /* Layout */
-import Layout from '../views/layout/Layout';
+// import Layout from '../views/layout/Layout';
 
 /**
 * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
@@ -23,41 +23,8 @@ import Layout from '../views/layout/Layout';
 **/
 export const constantRouterMap = [
   { path: '/login', component: () => import('@/views/login/index'), hidden: true },
-  { path: '/404', component: () => import('@/views/404'), hidden: true },
+  { path: '/404', component: () => import('@/views/404'), hidden: true }
 
-  {
-    path: '/system',
-    component: Layout,
-    redirect: '/system/user',
-    name: 'dashboard',
-    meta: { title: '系统管理', icon: 'user' },
-    children: [
-      {
-        path: 'user',
-        name: 'user',
-        component: () => import('@/views/system/user'),
-        meta: { title: '用户管理', icon: 'user' }
-      },
-      {
-        path: 'role',
-        name: 'role',
-        component: () => import('@/views/system/role'),
-        meta: { title: '角色管理', icon: 'user' }
-      },
-      {
-        path: 'menu',
-        name: 'systemMenu',
-        component: () => import('@/views/system/menu'),
-        meta: { title: '菜单管理', icon: 'user' }
-      },
-      {
-        path: 'log',
-        name: 'log',
-        component: () => import('@/views/system/user'),
-        meta: { title: '系统日志', icon: 'user' }
-      }
-    ]
-  }
 ];
 
 export default new Router({

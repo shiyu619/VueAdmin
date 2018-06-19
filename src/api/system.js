@@ -1,53 +1,40 @@
 
 import request from '@/utils/request';
-import qs from 'qs';
 import md5 from 'js-md5';
 // 登录
 const login = {
   p: ['get,/pb/login'],
   r: (username, password) => {
     return request({
-      'url': 'pb/login',
+      'url': 'system/api/login',
       'method': 'post',
-      contentType: 'application/x-www-form-urlencoded',
-      data: qs.stringify({
+      data: {
         loginName: username,
         password: md5(password)
-      })
+      }
     });
   }
 };
 // 获取用户信息
 const userList = {
-  p: ['get,/user'],
+  p: ['get,/system/api/getUserList'],
   r: token => {
     return request({
-      'url': '/user',
+      'url': '/system/api/getUserList',
       'method': 'get',
       'params': { token }
     });
   }
 };
 
-// 获取用户信息
-const roleList = {
+// 设置用户角色
+const updateUserRole = {
   p: ['get,/user/info'],
-  r: token => {
+  r: data => {
     return request({
-      'url': '/user/info',
-      'method': 'get',
-      'params': { token }
-    });
-  }
-};
-
-// 获取角色列表
-const getRoleList = {
-  p: ['get,/getRole'],
-  r: token => {
-    return request({
-      'url': '/getRole',
-      'method': 'get'
+      'url': 'system/api/updateUserRole',
+      'method': 'post',
+      data
     });
   }
 };
@@ -95,13 +82,48 @@ const delResources = {
     });
   }
 };
+// 获取角色列表
+const getRoleList = {
+  p: ['delete,/system/api/getRoles'],
+  r: data => {
+    return request({
+      'url': '/system/api/getRoles',
+      'method': 'get',
+      data
+    });
+  }
+};
+// 获取权限列表
+const getRole = {
+  p: ['delete,/system/api/getRole'],
+  r: id => {
+    return request({
+      'url': '/system/api/getRole',
+      'method': 'post',
+      data: { id }
+    });
+  }
+};
+// 修改角色权限
+const updateRole = {
+  p: ['delete,/system/api/updateRole'],
+  r: data => {
+    return request({
+      'url': '/system/api/updateRole',
+      'method': 'post',
+      data
+    });
+  }
+};
 export {
   login,
   userList,
-  roleList,
+  updateUserRole,
   getRoleList,
   getAllMenu,
   getSelectData,
   addMenu,
-  delResources
+  delResources,
+  getRole,
+  updateRole
 };

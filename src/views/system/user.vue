@@ -1,7 +1,7 @@
 <template>
   <div class="user-management">
     <h3 class="box-title" slot="header" style="width: 100%;">
-      <el-row style="width: 100%;">
+      <el-row style="width: 100%;" v-has="[$root.auth.userAdd]">
         <el-col :span="12">
           <el-button type="primary" icon="plus" @click="addUserForm">新增</el-button>
         </el-col>
@@ -20,20 +20,39 @@
         </el-table-column>
         <el-table-column label="照片" width="76">
           <template slot-scope="scope">
-            <img :src='scope.row.photo' style="height: 35px;vertical-align: middle;" alt="">
+            <img src='http://cn.chinadaily.com.cn/img/attachement/jpg/site1/20180211/509a4c2df41d1bea45f73b.jpg?imageView2/1/w/80/h/80' style="height: 35px;vertical-align: middle;" alt="">
           </template>
         </el-table-column>
         <el-table-column prop="name" label="名称">
           <template slot-scope="scope">
-            {{ scope.row.name }}
+            {{ scope.row.username }}
           </template>
         </el-table-column>
         <el-table-column prop="nickName" label="登录用户名">
           <template slot-scope="scope">
-            {{ scope.row.name }}
+            {{ scope.row.username }}
           </template>
         </el-table-column>
         <el-table-column prop="email" label="邮箱">
+        </el-table-column>
+        <el-table-column prop="login" label="登录次数">
+        </el-table-column>
+        <el-table-column prop="reg_time" label="注册时间">
+          <template slot-scope="scope">
+            {{scope.row.reg_time | formatterTime}}
+          </template>
+        </el-table-column>
+        <el-table-column prop="reg_ip" label="注册IP">
+        </el-table-column>
+        <el-table-column prop="last_login_time" label="最后登录时间">
+          <template slot-scope="scope">
+            {{scope.row.last_login_time | formatterTime}}
+          </template>
+        </el-table-column>
+        <el-table-column label="最后登录IP">
+          <template slot-scope="scope">
+            {{scope.row.last_login_ip | formatterTime}}
+          </template>
         </el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
@@ -42,11 +61,11 @@
         </el-table-column>
         <el-table-column label="操作" width="285">
           <template slot-scope="scope">
-            <el-button size="small" type="default" icon="edit" @click="handleEdit(scope.$index, scope.row)">编辑
+            <el-button v-has="[$root.auth.userUpdate]" size="small" type="default" icon="edit" @click="handleEdit(scope.$index, scope.row)">编辑
             </el-button>
-            <el-button size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">配置角色
+            <el-button v-has="[$root.auth.userAdd]" size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">配置角色
             </el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
+            <el-button v-has="[$root.auth.userDelete]" size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -101,13 +120,10 @@
         </div>
       </el-dialog>
 
-      <el-dialog title="配置用户角色" v-model="dialogVisible" size="tiny">
-        <div class="select-tree">
-          <el-scrollbar tag="div" class='is-empty' wrap-class="el-select-dropdown__wrap" view-class="el-select-dropdown__list">
-            <el-tree ref="roleTree" :data="roleTree" show-checkbox check-strictly node-key="id" v-loading="dialogLoading" :props="defaultProps">
-            </el-tree>
-          </el-scrollbar>
-        </div>
+      <el-dialog title="配置用户角色" :visible="dialogVisible">
+        <el-checkbox-group v-model="currentUserRoleList">
+          <el-checkbox v-for="item in roleTree" :key="item.id" :label="item.id">{{item.desc}}</el-checkbox>
+        </el-checkbox-group>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
           <el-button type="primary" @click="configUserRoles">确 定</el-button>
@@ -140,6 +156,7 @@
           desc: ''
         },
         userForm: false, // 用户新增和修改的弹窗
+        currentId: -1,
         userInfo: {},
         currentRow: {},
         dialogVisible: false,
@@ -150,6 +167,7 @@
           id: 'id'
         },
         roleTree: [],
+        currentUserRoleList: [],
         listLoading: false,
         searchKey: '',
         tableData: {
@@ -174,24 +192,32 @@
         this.currentRow = row;
         this.dialogVisible = true;
         if (this.roleTree.length <= 0) {
-          sysApi.roleList.r({ selectChildren: true })
+          sysApi.getRoleList.r()
             .then(res => {
-              this.roleTree = res;
+              this.roleTree = res.data.content;
+              this.currentId = row.id;
+              this.currentUserRoleList = [];
+              row.roles.split(',').map(item => {
+                this.currentUserRoleList.push(+item);
+              });
             });
         }
-        this.$http.get(api.SYS_USER_ROLE + '?id=' + row.id)
-          .then(res => {
-            this.$refs.roleTree.setCheckedKeys(res.data);
-          }).catch(err => {
-            console.log(err);
-          });
+        // this.$http.get(api.SYS_USER_ROLE + '?id=' + row.id)
+        //   .then(res => {
+        //     this.$refs.roleTree.setCheckedKeys(res.data);
+        //   }).catch(err => {
+        //     console.log(err);
+        //   });
       },
       configUserRoles() {
-        const checkedKeys = this.$refs.roleTree.getCheckedKeys();
-        this.$http.get(api.SYS_SET_USER_ROLE + '?userId=' + this.currentRow.id + '&roleIds=' + checkedKeys.join(','))
+        sysApi.updateUserRole.r({
+          id: this.currentId,
+          roles: this.currentUserRoleList
+        })
           .then(res => {
-            this.$message('修改成功');
             this.dialogVisible = false;
+            this.loadData();
+            this.toast('修改成功');
           });
       },
       handleSizeChange(val) {

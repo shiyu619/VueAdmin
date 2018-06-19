@@ -31,28 +31,28 @@
         </el-table-column>
         <el-table-column prop="nickName" label="名称">
           <template slot-scope="scope">
-            {{ scope.row.name }}
+            {{ scope.row.desc }}
           </template>
         </el-table-column>
         <el-table-column prop="nickName" label="描述">
           <template slot-scope="scope">
-            {{ scope.row.name }}
+            {{ scope.row.description }}
           </template>
         </el-table-column>
         <el-table-column label="状态">
           <template slot-scope="scope">
-            {{ scope.row.status===1 ? '已激活' : '未激活' }}
+            <el-tag :type="scope.row.status ? 'success': 'warning'">{{ scope.row.status===1 ? '已激活' : '未激活' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="325">
           <template slot-scope="scope">
-            <el-button size="small" type="default" icon="edit" @click="handleEdit(scope.$index, scope.row)">编辑
+            <el-button v-has="[$root.auth.role.update]" size="small" type="default" icon="edit" @click="handleEdit(scope.$index, scope.row)">编辑
             </el-button>
-            <el-button size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">授权
+            <el-button v-has="[$root.auth.role.authorization]" size="small" type="info" icon="setting" @click="handleRoleConfig(scope.$index, scope.row)">授权
             </el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">禁用
+            <el-button v-has="[$root.auth.role.disable]" size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">禁用
             </el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
+            <el-button v-has="[$root.auth.role.delete]" size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除
             </el-button>
           </template>
         </el-table-column>
@@ -83,7 +83,7 @@
       </el-dialog>
 
       <el-dialog title="配置用户角色" :visible="dialogResources" size="tiny" :before-close="handleCloseResources">
-        <el-tree :data="resources" show-checkbox default-expand-all node-key="id" ref="roleTree">
+        <el-tree :data="resources" show-checkbox check-strictly highlight-current default-expand-all node-key="id" ref="roleTree">
         </el-tree>
         <span slot="footer" class="dialog-footer">
           <el-button @click="handleCloseResources">取 消</el-button>
@@ -98,52 +98,25 @@
   import panel from '../../components/panel.vue';
   import * as api from '../../api';
   import * as sysApi from '@/api/system';
-  const resources = [{
-    id: 1,
-    label: '一级 1',
-    children: [{
-      id: 4,
-      label: '二级 1-1',
-      children: [{
-        id: 9,
-        label: '三级 1-1-1'
-      }, {
-        id: 10,
-        label: '三级 1-1-2'
-      }]
-    }]
-  }, {
-    id: 2,
-    label: '一级 2',
-    children: [{
-      id: 5,
-      label: '二级 2-1'
-    }, {
-      id: 6,
-      label: '二级 2-2'
-    }]
-  }, {
-    id: 3,
-    label: '一级 3',
-    children: [{
-      id: 7,
-      label: '二级 3-1'
-    }, {
-      id: 8,
-      label: '二级 3-2',
-      children: [{
-        id: 11,
-        label: '三级 3-2-1'
-      }, {
-        id: 12,
-        label: '三级 3-2-2'
-      }, {
-        id: 13,
-        label: '三级 3-2-3'
-      }]
-    }]
-  }];
-  export default {
+  const resources = [];
+  function arr_to_tree(data, pid) {
+    const result = [];
+    let temp;
+    var length = data.length;
+    for (var i = 0; i < length; i++) {
+      if (data[i].pid === pid) {
+        data[i].label = data[i].title;
+        result.push(data[i]);
+        temp = arr_to_tree(data, data[i].id);
+        if (temp.length > 0) {
+          data[i].children = temp;
+          data[i].chnum = data[i].children.length;
+        }
+      }
+    }
+    return result;
+  }
+export default {
     components: {
       'imp-panel': panel,
       'userForm': import('./addUserForm')
@@ -160,6 +133,7 @@
           resource: '',
           desc: ''
         },
+        id: '',
         resources: resources,
         userForm: false, // 用户新增和修改的弹窗
         userInfo: {},
@@ -193,17 +167,30 @@
 
       },
       handleRoleConfig(index, row) {
+        this.id = row.id;
         this.currentRow = row;
+        this.getRessources(row);
         this.dialogResources = true;
       },
-      configUserRoles() {
+      configUserRoles(row) {
         const checkedKeys = this.$refs.roleTree.getCheckedKeys();
         const nodesDOM = this.$refs.roleTree.$el.querySelectorAll('.el-tree-node');
         const nodesVue = [].map.call(nodesDOM, node => node.__vue__);
         nodesVue.filter(item => item.indeterminate === true).map(item => {
           checkedKeys.push(item.node.data.id);
         });
-        console.info([...new Set(checkedKeys)]);
+        const data = [...new Set(checkedKeys)];
+        sysApi.updateRole.r({
+          id: this.id,
+          ids: data
+        })
+          .then(res => {
+            this.toast('修改成功');
+            this.dialogResources = false;
+          })
+          .catch(err => {
+            this.errToast('修改失败' + err);
+          });
       },
       handleSizeChange(val) {
         this.tableData.pagination.pageSize = val;
@@ -249,6 +236,19 @@
       },
       handleCloseResources() {
         this.dialogResources = false;
+      },
+      setCheckedKeys(keys) {
+        this.$refs.roleTree.setCheckedKeys(keys);
+      },
+      getRessources(row) {
+        sysApi.getAllMenu.r()
+          .then(res => {
+            this.resources = arr_to_tree(res.data, 0)[0].children;
+            sysApi.getRole.r(row.id)
+              .then(res => {
+                this.setCheckedKeys(res.data);
+              });
+          });
       }
     },
     created() {
@@ -274,7 +274,10 @@
   color: #bfcbd9;
   transition: all 0.3s;
 }
-.el-tree-node .el-tree-node .el-tree-node {
+.el-tree-node__children
+  > .el-tree-node
+  > .el-tree-node__children
+  > .el-tree-node {
   display: inline-block;
   .el-tree-node__content:hover {
     background-color: transparent;

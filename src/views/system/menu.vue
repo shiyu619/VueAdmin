@@ -1,6 +1,6 @@
 <template>
   <div class="padding20">
-    <el-table :data="menuList" border style="width: 100%" align="center">
+    <!-- <el-table :data="menuList" border style="width: 100%" align="center">
       <el-table-column prop="date" label="icon" width="50" align="center">
         <template slot-scope="scope">
           <i :class="scope.row.icon"></i>
@@ -36,7 +36,44 @@
           <el-button @click="delResources(scope.row.id)" type="danger" size="small">删除</el-button>
         </template>
       </el-table-column>
-    </el-table>
+    </el-table> -->
+    <tree-table :data="menuList" border :expandAll="true">
+      <el-table-column prop="date" label="icon" width="50" align="center">
+        <template slot-scope="scope">
+          <i :class="scope.row.icon"></i>
+        </template>
+      </el-table-column>
+      <el-table-column prop="title" label="名称" width="600">
+        <template slot-scope="scope">
+          <span v-html="scope.row.sql + scope.row.title"></span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="title" label="类型" width="100">
+        <template slot-scope="scope">
+          <el-tag>
+            <span>{{['', '菜单', '按钮', '功能'][scope.row.type] || '顶级'}}</span>
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="url" label="url">
+      </el-table-column>
+      <el-table-column prop="status" label="状态" width="100">
+        <template slot-scope="scope">
+          <el-tag :type="scope.row.status ? 'success' : 'warning'">
+            {{ scope.row.status ? '启用' : '禁用' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button v-has="[$root.auth.menu.addSub]" @click="openMenuDialog(scope.row)" type="primary" size="small">添加下级</el-button>
+          <el-button v-has="[$root.auth.menu.update]" @click="openMenuDialog(scope.row, 'update')" type="info" size="small">编辑</el-button>
+          <el-button v-has="[$root.auth.menu.disable]" type="warning" size="small">禁用</el-button>
+          <el-button v-has="[$root.auth.menu.delete]" @click="delResources(scope.row.id)" type="danger" size="small">删除</el-button>
+        </template>
+      </el-table-column>
+    </tree-table>
 
     <el-dialog title="提示" :visible.sync="operatorMneuDialog" :before-close="handleClose" width="50%">
       <el-dialog width="50%" title="选择图标" :visible.sync="iconDialog" append-to-body @open="iconDialogOpen">
@@ -98,8 +135,27 @@
 
 <script>
   import * as systemAPi from '@/api/system';
+  import treeTable from '@/components/TreeTable';
+  function arr_to_tree(data, pid) {
+    const result = [];
+    let temp;
+    var length = data.length;
+    for (var i = 0; i < length; i++) {
+      if (data[i].pid === pid) {
+        data[i].label = data[i].title;
+        result.push(data[i]);
+        temp = arr_to_tree(data, data[i].id);
+        if (temp.length > 0) {
+          data[i].children = temp;
+          data[i].chnum = data[i].children.length;
+        }
+      }
+    }
+    return result;
+  }
   export default {
     name: 'systemMenu',
+    components: { treeTable },
     data() {
       return {
         menuFormRules: {},
@@ -108,7 +164,26 @@
         iconDialog: false,
         operatorMneuDialog: false,
         menuList: [],
-        menuSelectData: []
+        menuSelectData: [],
+        columns: [
+          {
+            text: 'icon',
+            value: 'icon',
+            width: 50
+          },
+          {
+            text: '名称',
+            value: 'title'
+          },
+          {
+            text: '类型',
+            value: 'type'
+          },
+          {
+            text: 'url',
+            value: 'url'
+          }
+        ]
       };
     },
     created() {
@@ -118,7 +193,7 @@
       loadMenuList() {
         systemAPi.getAllMenu.r()
           .then(res => {
-            this.menuList = res.data;
+            this.menuList = arr_to_tree(res.data, 0);
           });
       },
       openMenuDialog(row, type) {

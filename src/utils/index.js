@@ -1,7 +1,7 @@
 /**
  * Created by jiachenpan on 16/11/18.
  */
-
+var _ = require('lodash');
 export function parseTime(time, cFormat) {
   if (arguments.length === 0) {
     return null;
@@ -56,3 +56,47 @@ export function formatTime(time, option) {
     return d.getMonth() + 1 + '月' + d.getDate() + '日' + d.getHours() + '时' + d.getMinutes() + '分';
   }
 }
+
+// 菜单数据组织
+export const buildMenu = function(array, ckey) {
+  const menuData = [];
+  // idList
+  const indexKeys = Array.isArray(array) ? array.map((e) => { return e.id; }) : [];
+  // parent id
+  ckey = ckey || 'parent_id';
+  array.forEach(function(e, i) {
+    // top level
+    if (!e[ckey] || (e[ckey] === e.id)) {
+      delete e[ckey];
+      menuData.push(_.cloneDeepWith(e)); // 深拷贝
+    } else if (Array.isArray(indexKeys)) {
+      // 检测ckey有效性
+      const parentIndex = indexKeys.findIndex(function(id) {
+        return id === e[ckey];
+      });
+      if (parentIndex === -1) {
+        menuData.push(e);
+      }
+    }
+  });
+  const findChildren = function(parentArr) {
+    if (Array.isArray(parentArr) && parentArr.length) {
+      parentArr.forEach(function(parentNode) {
+        array.forEach(function(node) {
+          if (parentNode.id === node[ckey]) {
+            if (parentNode.children) {
+              parentNode.children.push(node);
+            } else {
+              parentNode.children = [node];
+            }
+          }
+        });
+        if (parentNode.children) {
+          findChildren(parentNode.children);
+        }
+      });
+    }
+  };
+  findChildren(menuData);
+  return menuData;
+};

@@ -1,28 +1,26 @@
 
 import request from '@/utils/request';
-import qs from 'qs';
 import md5 from 'js-md5';
 // 登录
 const login = {
   p: ['get,/pb/login'],
   r: (username, password) => {
     return request({
-      'url': 'pb/login',
+      'url': 'system/api/login',
       'method': 'post',
-      contentType: 'application/x-www-form-urlencoded',
-      data: qs.stringify({
+      data: {
         loginName: username,
         password: md5(password)
-      })
+      }
     });
   }
 };
 // 获取用户信息
 const getInfo = {
-  p: ['get,/user/info'],
+  p: ['get,system/api/userInfo'],
   r: token => {
     return request({
-      'url': '/user/info',
+      'url': 'system/api/userInfo',
       'method': 'get',
       'params': { token }
     });

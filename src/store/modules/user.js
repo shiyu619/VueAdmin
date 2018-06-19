@@ -55,15 +55,15 @@ const user = {
       return new Promise((resolve, reject) => {
         getInfo.r(state.token).then(response => {
           const data = response.data;
-          if (data.userInfo.resources && data.userInfo.resources.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.userInfo.resources);
+          if (data.resources && data.resources.length > 0) { // 验证返回的roles是否是一个非空数组
+            commit('SET_ROLES', data.resources);
           } else {
             reject('getInfo: roles must be a non-null array !');
           }
           commit('SET_NAME', data.userInfo.name);
           commit('SET_ID', data.userInfo.id);
           commit('SET_AVATAR', data.userInfo.avatar);
-          commit('SET_RESOURCES', [1]);
+          commit('SET_RESOURCES', data.resources);
           resolve(response);
         }).catch(error => {
           reject(error);
